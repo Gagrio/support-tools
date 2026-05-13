@@ -1,9 +1,9 @@
 [package]
-name = "buttcrack"
+name = "pack"
 version = "0.1.0"
 edition = "2021"
 authors = ["George Agriogiannis <george.agriogiannis2@suse.com>"]
-description = "Batch Utility To Transfer Cluster Resources And Configs Kit"
+description = "Path Archiver Collection Kit"
 license = "Apache-2.0"
 
 [dependencies]

@@ -9,8 +9,8 @@ pub fn create_archive(
     output_dir: &str,
     timestamp: &str,
 ) -> Result<String> {
-    let archive_name = format!("{}/buttcrack_logs_{}.tar.gz", output_dir, timestamp);
-    let top_dir = format!("buttcrack_logs_{}", timestamp);
+    let archive_name = format!("{}/pack_logs_{}.tar.gz", output_dir, timestamp);
+    let top_dir = format!("pack_logs_{}", timestamp);
 
     info!("Creating archive: {}", archive_name);
 
@@ -66,7 +66,7 @@ fn build_summary(entries: &[CollectedEntry], source_paths: &[String], timestamp:
         .join("\n");
 
     format!(
-        "collection_info:\n  timestamp: \"{}\"\n  tool: buttcrack\n  version: \"{}\"\n\npaths_collected:\n{}\n\ncollection_summary:\n  total_files: {}\n  total_directories: {}\n",
+        "collection_info:\n  timestamp: \"{}\"\n  tool: pack\n  version: \"{}\"\n\npaths_collected:\n{}\n\ncollection_summary:\n  total_files: {}\n  total_directories: {}\n",
         timestamp,
         env!("CARGO_PKG_VERSION"),
         paths_yaml,
