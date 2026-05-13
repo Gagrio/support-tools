@@ -1,0 +1,45 @@
+name: "PACK: Release"
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Release version'
+        required: true
+        type: string
+
+jobs:
+  build-check:
+    uses: ./.github/workflows/pack-build-check.yaml
+
+  release:
+    needs: [ build-check ]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v4
+
+      - name: Validate version format
+        run: |
+          if ! echo "${{ inputs.version }}" | grep -qE '^[0-9]+\.[0-9]+\.[0-9]+$'; then
+            echo "Error: Version must be in semver format (e.g., 1.0.0)"
+            exit 1
+          fi
+
+      - name: Check tag does not already exist
+        run: |
+          if git ls-remote --tags origin | grep -q "refs/tags/pack-v${{ inputs.version }}$"; then
+            echo "Error: Tag pack-v${{ inputs.version }} already exists"
+            exit 1
+          fi
+
+      - name: Create tag and GitHub release
+        uses: softprops/action-gh-release@153bb8e04406b158c6c84fc1615b65b24149a1fe # v2.6.1
+        with:
+          tag_name: pack-v${{ inputs.version }}
+          name: "PACK v${{ inputs.version }}"
+          generate_release_notes: true
+          make_latest: true

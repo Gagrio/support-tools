@@ -10,6 +10,7 @@ A collection of utilities used by SUSE Edge Support.
 |------|-------------|
 | 🦕 [nessie](./nessie/) | Log and configuration collector for SUSE Edge clusters |
 | 📋 [components-versions](./components-versions/) | Version reporter for Helm charts, pods, and nodes |
+| 📦 [pack](./pack/) | Path Archiver Collection Kit — collects arbitrary host paths into a tar.gz for upload and investigation |
 
 ---
 
