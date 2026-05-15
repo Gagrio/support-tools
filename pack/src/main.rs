@@ -7,14 +7,16 @@ mod archive;
 mod collector;
 
 #[derive(Parser, Debug)]
-#[command(
-    name = "pack",
-    about = "Path Archiver Collection Kit",
-    version
-)]
+#[command(name = "pack", about = "Path Archiver Collection Kit", version)]
 struct Args {
     /// Comma-separated list of host paths to collect
-    #[arg(short, long, env = "PACK_PATHS", value_delimiter = ',', required = true)]
+    #[arg(
+        short,
+        long,
+        env = "PACK_PATHS",
+        value_delimiter = ',',
+        required = true
+    )]
     paths: Vec<String>,
 
     /// Output directory for the archive
