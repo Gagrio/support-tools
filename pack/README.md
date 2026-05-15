@@ -228,6 +228,29 @@ src/
   -v /tmp:/tmp:Z
   ```
 
+## 🚢 Releasing
+
+PACK uses a manual release workflow via GitHub Actions.
+
+To create a new release:
+
+1. Go to **Actions** → **PACK: Release** → **Run workflow**
+2. Enter the version number in semver format (e.g., `1.0.0`)
+3. The workflow will:
+   * Run build checks (formatting, clippy, compilation, tests)
+   * Validate the version format and ensure the tag doesn't already exist
+   * Create a GitHub Release with tag `pack-v<version>` and auto-generated release notes
+   * Build and push a multi-arch container image to `ghcr.io/<org>/pack:<version>` and `:latest`
+
+### Container Image Tags
+
+| When | Image Tags |
+|------|------------|
+| Release `1.0.0` triggered | `ghcr.io/<org>/pack:1.0.0`, `ghcr.io/<org>/pack:latest` |
+| Release `1.1.0` triggered | `ghcr.io/<org>/pack:1.1.0`, `ghcr.io/<org>/pack:latest` |
+
+The `:latest` tag always points to the most recent release.
+
 ## 📄 License
 
 This project is licensed under the Apache License 2.0 - see the [LICENSE](../LICENSE) file for details.

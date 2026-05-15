@@ -53,3 +53,7 @@ jobs:
       - name: Run tests
         working-directory: pack
         run: cargo test --all-features
+
+      - name: Run tests
+        working-directory: pack
+        run: cargo test --all-features
