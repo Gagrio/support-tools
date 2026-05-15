@@ -1,6 +1,6 @@
 [project]
 name = "suse-edge-components-versions"
-version = "0.2.3"
+version = "0.3.0"
 description = "A tool to gather and display component versions for SUSE Edge products."
 readme = "README.md"
 requires-python = ">=3.11"
