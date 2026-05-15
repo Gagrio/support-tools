@@ -45,6 +45,16 @@ podman run --rm --privileged \
 
 **Note:** Each input path must be explicitly bind-mounted into the container with `:ro`. The output directory must be mounted with write access. The `:Z` flag may be required on SELinux systems — see the [SELinux note](#-troubleshooting) below.
 
+**Root-only paths:** When collecting paths readable only by root (e.g. `/var/log`, etcd data), run with `sudo`:
+```bash
+sudo podman run --rm --privileged \
+           -v /var/log:/var/log:ro \
+           -v /tmp:/tmp \
+           registry.opensuse.org/isv/suse/edge/support-tools/images/pack:latest \
+           --paths /var/log --output /tmp
+```
+Without `sudo`, rootless Podman maps container root to your unprivileged user and root-owned files will be skipped.
+
 ### Installation from Source
 
 **Prerequisites:**
@@ -194,7 +204,7 @@ cargo build --release
 # Run tests
 cargo test
 
-# Format code
+# Format code (run before every commit to avoid CI failures)
 cargo fmt
 
 # Check for issues
@@ -220,6 +230,10 @@ src/
 **📁 "Permission denied" on output**
 - Ensure the output directory is mounted with write access (no `:ro`)
 - Try using `/tmp` as the output directory
+
+**🔑 Some files skipped due to permissions**
+- In rootless Podman, container root maps to your unprivileged user on the host — root-only files will be skipped with a warning
+- Run with `sudo podman run` to get actual root access and collect all files
 
 **🔒 SELinux volume mount errors**
 - Add `:Z` to volume mounts on SELinux-enforcing systems:
