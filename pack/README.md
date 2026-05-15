@@ -11,7 +11,7 @@ A blazingly fast 🦀 Rust-powered tool that collects arbitrary host paths and a
 🔒 **Read-Only by Design** - Input paths are always mounted read-only in container mode
 🐳 **Container Ready** - Runs as a privileged container with explicit host path mounts and SELinux support
 ⚙️ **Env Var Support** - Every flag has a `PACK_*` env var equivalent for Ansible-driven automation
-🔌 **stack-validation Native** - Output naming and archive format designed to plug directly into existing Ansible upload pipelines
+📤 **Upload Ready** - Produces a single self-contained archive ready for sharing with support engineers
 🦀 **Fast & Safe** - Built with Rust for reliable, predictable behaviour under privileged execution
 
 ## 🚀 Quick Start
@@ -44,21 +44,6 @@ podman run --rm --privileged \
 ```
 
 **Note:** Each input path must be explicitly bind-mounted into the container with `:ro`. The output directory must be mounted with write access. The `:Z` flag may be required on SELinux systems — see the [SELinux note](#-troubleshooting) below.
-
-### Building Custom Container Image
-
-```bash
-# Build the container image
-podman build -t pack:custom .
-
-# Run your custom image
-podman run --rm --privileged \
-           -v /var/lib/rancher/rke2/server/db/etcd:/var/lib/rancher/rke2/server/db/etcd:ro \
-           -v /tmp:/tmp \
-           pack:custom \
-           --paths /var/lib/rancher/rke2/server/db/etcd \
-           --output /tmp
-```
 
 ### Installation from Source
 
@@ -126,8 +111,6 @@ pack_logs_2025-11-12_14-30-00/
 └── collection-summary.yaml
 ```
 
-The `_logs_` infix in the archive name is intentional — it allows the existing `nessie_upload_logs.yaml` Ansible playbook in stack-validation to pick up PACK archives with its `*logs*.tar.gz` glob without any changes.
-
 ## 🏗️ Architecture
 
 ```
@@ -164,30 +147,6 @@ The `_logs_` infix in the archive name is intentional — it allows the existing
                               │
                               ▼
                     pack_logs_<timestamp>.tar.gz
-                              │
-┌─────────────────────────────┼───────────────────────────────────┐
-│              ANSIBLE / stack-validation                         │
-│                             │                                   │
-│  ┌───────────────────────────▼───────────────────────────────┐  │
-│  │ pack_collect.yaml                                         │  │
-│  │ podman run --privileged                                   │  │
-│  │   -v /host/path:/host/path:ro   (per input path)         │  │
-│  │   -v /tmp:/tmp                  (output, rw)             │  │
-│  │                                                           │  │
-│  │ sed rename →                                             │  │
-│  │   pack_<CLUSTER><CLUSTER_SUFFIX>_logs_<timestamp>         │  │
-│  └───────────────────────────┬───────────────────────────────┘  │
-│                              │                                  │
-│  ┌───────────────────────────▼───────────────────────────────┐  │
-│  │ nessie_upload_logs.yaml (reused as-is)                    │  │
-│  │ glob: *logs*.tar.gz · WebDAV PUT                          │  │
-│  └───────────────────────────┬───────────────────────────────┘  │
-│                              │                                  │
-└─────────────────────────────┼───────────────────────────────────┘
-                              │
-                              ▼
-                       WebDAV server
-                  /pipelines/<id>/logs/
 ```
 
 ## 💡 Common Use Cases
@@ -269,9 +228,28 @@ src/
   -v /tmp:/tmp:Z
   ```
 
-**📦 Archive not picked up by upload playbook**
-- Verify the archive name contains `_logs_` — this is required by the `nessie_upload_logs.yaml` glob
-- Check the output directory matches `log_source_dir` passed to the upload playbook
+## 🚢 Releasing
+
+PACK uses a manual release workflow via GitHub Actions.
+
+To create a new release:
+
+1. Go to **Actions** → **PACK: Release** → **Run workflow**
+2. Enter the version number in semver format (e.g., `1.0.0`)
+3. The workflow will:
+   * Run build checks (formatting, clippy, compilation, tests)
+   * Validate the version format and ensure the tag doesn't already exist
+   * Create a GitHub Release with tag `pack-v<version>` and auto-generated release notes
+   * Build and push a multi-arch container image to `ghcr.io/<org>/pack:<version>` and `:latest`
+
+### Container Image Tags
+
+| When | Image Tags |
+|------|------------|
+| Release `1.0.0` triggered | `ghcr.io/<org>/pack:1.0.0`, `ghcr.io/<org>/pack:latest` |
+| Release `1.1.0` triggered | `ghcr.io/<org>/pack:1.1.0`, `ghcr.io/<org>/pack:latest` |
+
+The `:latest` tag always points to the most recent release.
 
 ## 📄 License
 
@@ -282,7 +260,6 @@ This project is part of the SUSE Edge Support Tools collection.
 ## 🙏 Acknowledgments
 
 - 🦀 Built with **Rust** for performance and safety
-- 🔌 Designed to integrate natively with **stack-validation** Ansible pipelines
 - 📦 Keeping it simple, one archive at a time
 
 ---
